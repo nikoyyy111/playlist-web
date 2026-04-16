@@ -2,8 +2,8 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PlayList Nika - Pure Smooth</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>PlayList Nika - Smooth & Responsive</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;800&display=swap');
 
@@ -20,14 +20,14 @@
             justify-content: center;
             align-items: center;
             min-height: 100vh;
+            overflow: hidden; 
             background-color: #050505;
-            overflow: hidden;
             color: #ffffff;
             position: relative;
         }
 
         /* =========================================
-           SMOOTH LOADING PAGE (NIKA AWAKENING)
+           SMOOTH LOADING PAGE
            ========================================= */
         #nika-loader {
             position: fixed;
@@ -41,19 +41,16 @@
             transition: opacity 1s ease;
         }
 
-        /* Inti Matahari (Detak Jantung Super Mulus) */
         .nika-sun-core {
             width: 50px; height: 50px;
             background: #ffffff;
             border-radius: 50%;
             position: relative;
             z-index: 2;
-            /* Glow halus tanpa garis tepi */
             box-shadow: 0 0 20px #ffffff, 0 0 50px rgba(255, 255, 255, 0.4);
             animation: smooth-rhythm 1.6s infinite cubic-bezier(0.25, 0.8, 0.25, 1);
         }
 
-        /* Gelombang Cahaya Bias (Menggantikan garis shockwave) */
         .nika-sun-core::before {
             content: '';
             position: absolute;
@@ -66,17 +63,14 @@
             z-index: -1;
         }
 
-        /* Transisi Ledakan Akhir (Whiteout Mulus) */
         .nika-sun-core.explode {
             animation: none;
             transition: transform 1s cubic-bezier(0.8, 0, 0.2, 1), opacity 0.8s ease;
-            transform: scale(60); /* Membesar menutupi layar dengan bulat sempurna */
+            transform: scale(80); 
             opacity: 0;
             box-shadow: 0 0 100px #fff;
         }
-        .nika-sun-core.explode::before {
-            display: none; /* Matikan efek bias saat meledak */
-        }
+        .nika-sun-core.explode::before { display: none; }
 
         .loader-text {
             margin-top: 60px;
@@ -87,11 +81,9 @@
             text-transform: uppercase;
             position: relative;
             z-index: 2;
-            /* Animasi napas halus, bukan glitch */
             animation: smooth-text-breathe 1.6s infinite alternate var(--smooth-ease);
         }
 
-        /* Ritme Detak (Dum... Da-Dum) tapi murni dari skala & cahaya */
         @keyframes smooth-rhythm {
             0%, 100% { transform: scale(1); box-shadow: 0 0 20px #fff, 0 0 40px rgba(255,255,255,0.2); }
             15% { transform: scale(1.3); box-shadow: 0 0 40px #fff, 0 0 80px rgba(255,255,255,0.5); } 
@@ -100,7 +92,6 @@
             60% { transform: scale(1); box-shadow: 0 0 20px #fff, 0 0 40px rgba(255,255,255,0.2); }
         }
 
-        /* Gelombang cahaya menyebar halus */
         @keyframes smooth-pulse {
             0%, 25% { width: 100%; height: 100%; opacity: 0.8; }
             35% { width: 350%; height: 350%; opacity: 0.5; }
@@ -119,88 +110,163 @@
         }
 
         /* =========================================
-           MAIN PLAYER STYLES (MONOCHROME GLASS)
+           BACKGROUND BLOBS
            ========================================= */
         .blob {
             position: absolute; border-radius: 50%; filter: blur(70px); z-index: 1; opacity: 0.5;
             animation: float 12s infinite alternate var(--smooth-ease);
         }
-        .blob-1 { width: 400px; height: 400px; background: linear-gradient(135deg, #ffffff, #333333); top: -5%; left: 5%; }
-        .blob-2 { width: 350px; height: 350px; background: linear-gradient(135deg, #666666, #111111); bottom: -5%; right: 5%; animation-delay: -4s; }
+        .blob-1 { width: 40vw; height: 40vw; min-width: 300px; min-height: 300px; background: linear-gradient(135deg, #ffffff, #333333); top: -5%; left: -5%; }
+        .blob-2 { width: 35vw; height: 35vw; min-width: 250px; min-height: 250px; background: linear-gradient(135deg, #666666, #111111); bottom: -5%; right: -5%; animation-delay: -4s; }
 
         @keyframes float {
             0% { transform: translateY(0) translateX(0) scale(0.9); }
             100% { transform: translateY(-40px) translateX(40px) scale(1.1); }
         }
 
-        /* Kotak disembunyikan sepenuhnya di awal agar tidak bocor */
+        /* =========================================
+           MAIN PLAYER (RESPONSIVE)
+           ========================================= */
         #playerWrapper {
             display: none; 
             opacity: 0;
             z-index: 10;
+            width: 100%;
+            display: flex;
+            justify-content: center;
         }
 
-        #playerWrapper.visible {
-            display: block;
-        }
+        #playerWrapper.visible { display: flex; }
 
         .glass-card {
-            position: relative; width: 360px;
+            position: relative; 
+            width: 90%; 
+            max-width: 380px; 
             background: rgba(255, 255, 255, 0.03);
             backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px);
-            border: 1px solid rgba(255, 255, 255, 0.08); border-bottom: 1px solid rgba(255, 255, 255, 0.02); border-right: 1px solid rgba(255, 255, 255, 0.02);
-            border-radius: 28px; padding: 40px 35px;
+            border: 1px solid rgba(255, 255, 255, 0.08); 
+            border-bottom: 1px solid rgba(255, 255, 255, 0.02); 
+            border-right: 1px solid rgba(255, 255, 255, 0.02);
+            border-radius: 28px; 
+            padding: 30px 25px; 
             box-shadow: 0 25px 50px rgba(0, 0, 0, 0.9); text-align: center;
-            
-            /* Animasi masuk dari bawah */
             transform: translateY(30px) scale(0.98);
             transition: all 1.2s var(--smooth-ease); 
+            box-sizing: border-box; 
         }
 
-        #playerWrapper.visible .glass-card.show { 
-            opacity: 1; 
-            transform: translateY(0) scale(1); 
-        }
+        #playerWrapper.visible .glass-card.show { opacity: 1; transform: translateY(0) scale(1); }
 
-        h2 { margin: 0 0 20px 0; font-weight: 800; font-size: 1.8em; letter-spacing: 2px; color: #ffffff; animation: breathe-glow 4s infinite alternate var(--smooth-ease); }
+        h2 { 
+            margin: 0 0 20px 0; font-weight: 800; font-size: 1.6em; letter-spacing: 2px; 
+            color: #ffffff; animation: breathe-glow 4s infinite alternate var(--smooth-ease); 
+        }
         @keyframes breathe-glow { 0% { text-shadow: 0 0 5px rgba(255,255,255,0.1); } 100% { text-shadow: 0 0 15px rgba(255,255,255,0.6), 0 0 25px rgba(255,255,255,0.2); } }
 
         .custom-file-upload {
-            display: inline-block; padding: 12px 28px; cursor: pointer; background: rgba(255, 255, 255, 0.03);
+            display: inline-block; padding: 12px 20px; cursor: pointer; background: rgba(255, 255, 255, 0.03);
             border: 1px solid rgba(255, 255, 255, 0.15); border-radius: 50px; font-size: 0.85em; font-weight: 600;
-            color: #fff; margin-bottom: 25px; width: 70%; transition: all 0.4s var(--smooth-ease);
+            color: #fff; margin-bottom: 25px; width: 80%; transition: all 0.4s var(--smooth-ease);
+            box-sizing: border-box; 
+            -webkit-user-select: none; user-select: none;
         }
-        .custom-file-upload:hover { background: rgba(255, 255, 255, 0.1); border-color: rgba(255, 255, 255, 0.5); transform: translateY(-2px); box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2), 0 0 15px rgba(255,255,255,0.1); }
+        
+        @media (hover: hover) {
+            .custom-file-upload:hover { background: rgba(255, 255, 255, 0.1); border-color: rgba(255, 255, 255, 0.5); transform: translateY(-2px); box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2), 0 0 15px rgba(255,255,255,0.1); }
+        }
+        
         .custom-file-upload:active { transform: translateY(1px) scale(0.97); }
         input[type="file"] { display: none; }
 
-        .progress-container { display: flex; align-items: center; justify-content: space-between; gap: 15px; margin-bottom: 30px; font-size: 0.75em; font-weight: 400; color: rgba(255, 255, 255, 0.5); }
-        input[type="range"] { -webkit-appearance: none; width: 100%; height: 4px; background: rgba(255, 255, 255, 0.15); border-radius: 5px; outline: none; cursor: pointer; transition: background 0.4s var(--smooth-ease); }
-        input[type="range"]:hover { background: rgba(255, 255, 255, 0.3); }
-        input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; width: 12px; height: 12px; border-radius: 50%; background: #fff; box-shadow: 0 0 10px rgba(255, 255, 255, 0.5); cursor: pointer; transition: transform 0.3s var(--bouncy-ease), box-shadow 0.3s var(--smooth-ease); }
-        input[type="range"]::-webkit-slider-thumb:hover { transform: scale(1.8); box-shadow: 0 0 15px rgba(255, 255, 255, 0.8); }
+        /* --- FIX TEXT PANJANG (TRUNCATE) --- */
+        .status { 
+            font-size: 0.85em; 
+            font-weight: 300; 
+            color: rgba(255, 255, 255, 0.4); 
+            margin-bottom: 20px; 
+            transition: color 0.4s var(--smooth-ease); 
+            
+            /* Penambahan agar teks dipotong rapi dengan titik tiga (...) */
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            width: 100%;
+            display: block;
+            box-sizing: border-box;
+            padding: 0 10px;
+        }
 
-        .controls { display: flex; justify-content: center; align-items: center; gap: 18px; margin-bottom: 30px; }
-        button { border: none; background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.1); color: white; border-radius: 50px; cursor: pointer; display: flex; justify-content: center; align-items: center; transition: all 0.4s var(--smooth-ease); }
-        button:hover { background: rgba(255, 255, 255, 0.1); transform: translateY(-3px); border-color: rgba(255, 255, 255, 0.3); box-shadow: 0 10px 20px rgba(0,0,0,0.2); }
+        .progress-container { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 25px; font-size: 0.75em; font-weight: 400; color: rgba(255, 255, 255, 0.5); }
+        input[type="range"] { -webkit-appearance: none; width: 100%; height: 4px; background: rgba(255, 255, 255, 0.15); border-radius: 5px; outline: none; cursor: pointer; transition: background 0.4s var(--smooth-ease); }
+        
+        @media (hover: hover) {
+            input[type="range"]:hover { background: rgba(255, 255, 255, 0.3); }
+        }
+
+        input[type="range"]::-webkit-slider-thumb { 
+            -webkit-appearance: none; width: 14px; height: 14px; 
+            border-radius: 50%; background: #fff; box-shadow: 0 0 10px rgba(255, 255, 255, 0.5); cursor: pointer; 
+            transition: transform 0.3s var(--bouncy-ease), box-shadow 0.3s var(--smooth-ease); 
+        }
+        
+        @media (hover: hover) {
+            input[type="range"]::-webkit-slider-thumb:hover { transform: scale(1.6); box-shadow: 0 0 15px rgba(255, 255, 255, 0.8); }
+        }
+
+        .controls { display: flex; justify-content: center; align-items: center; gap: 15px; margin-bottom: 25px; }
+        button { 
+            border: none; background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.1); 
+            color: white; border-radius: 50px; cursor: pointer; display: flex; justify-content: center; 
+            align-items: center; transition: all 0.4s var(--smooth-ease);
+            -webkit-user-select: none; user-select: none; 
+            -webkit-tap-highlight-color: transparent; 
+        }
+        
+        @media (hover: hover) {
+            button:hover { background: rgba(255, 255, 255, 0.1); transform: translateY(-3px); border-color: rgba(255, 255, 255, 0.3); box-shadow: 0 10px 20px rgba(0,0,0,0.2); }
+        }
+
         button:active { transform: translateY(1px) scale(0.92); transition: all 0.1s; }
         
-        #playBtn, #pauseBtn { padding: 16px 28px; font-size: 1.2em; background: #ffffff; color: #000000; font-weight: bold; box-shadow: 0 5px 15px rgba(255,255,255,0.1); }
-        #playBtn:hover, #pauseBtn:hover { background: #e0e0e0; transform: translateY(-4px) scale(1.05); box-shadow: 0 15px 25px rgba(255, 255, 255, 0.25); }
+        #playBtn, #pauseBtn { padding: 14px 26px; font-size: 1.2em; background: #ffffff; color: #000000; font-weight: bold; box-shadow: 0 5px 15px rgba(255,255,255,0.1); }
+        
+        @media (hover: hover) {
+            #playBtn:hover, #pauseBtn:hover { background: #e0e0e0; transform: translateY(-4px) scale(1.05); box-shadow: 0 15px 25px rgba(255, 255, 255, 0.25); }
+        }
+        
         #playBtn:active, #pauseBtn:active { transform: scale(0.95); }
         
-        #loopBtn { padding: 12px 20px; font-size: 0.85em; font-weight: 600;}
+        #loopBtn { padding: 10px 16px; font-size: 0.8em; font-weight: 600;}
         #loopBtn.active { background: rgba(255, 255, 255, 0.15); border-color: rgba(255, 255, 255, 0.8); box-shadow: 0 0 15px rgba(255,255,255,0.15); }
 
-        .status { font-size: 0.85em; font-weight: 300; color: rgba(255, 255, 255, 0.4); margin-bottom: 20px; height: 20px; transition: color 0.4s var(--smooth-ease); }
-
-        .playlist-container { background: rgba(0, 0, 0, 0.15); border-radius: 20px; max-height: 160px; overflow-y: auto; text-align: left; border: 1px solid rgba(255, 255, 255, 0.03); padding: 6px; }
-        .playlist-item { padding: 14px 18px; border-radius: 14px; margin-bottom: 3px; cursor: pointer; font-size: 0.85em; font-weight: 400; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: rgba(255, 255, 255, 0.5); transition: all 0.3s var(--smooth-ease); opacity: 0; transform: translateY(15px); animation: slideUpFade 0.5s var(--smooth-ease) forwards; }
-        @keyframes slideUpFade { to { opacity: 1; transform: translateY(0); } }
-        .playlist-item:hover { background: rgba(255, 255, 255, 0.08); padding-left: 24px; color: #fff; }
-        .playlist-item.playing { color: #000; font-weight: 600; background: #fff; padding-left: 24px; transform: scale(0.98); box-shadow: inset 0 0 10px rgba(0,0,0,0.1); }
+        /* Playlist area */
+        .playlist-container { 
+            background: rgba(0, 0, 0, 0.15); border-radius: 20px; 
+            max-height: 180px; 
+            overflow-y: auto; text-align: left; border: 1px solid rgba(255, 255, 255, 0.03); padding: 5px; 
+            -webkit-overflow-scrolling: touch; 
+        }
         
+        .playlist-item { 
+            padding: 12px 15px; border-radius: 12px; margin-bottom: 3px; cursor: pointer; 
+            font-size: 0.85em; font-weight: 400; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; 
+            color: rgba(255, 255, 255, 0.5); transition: all 0.3s var(--smooth-ease); opacity: 0; 
+            transform: translateY(15px); animation: slideUpFade 0.5s var(--smooth-ease) forwards; 
+            -webkit-user-select: none; user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        @keyframes slideUpFade { to { opacity: 1; transform: translateY(0); } }
+        
+        @media (hover: hover) {
+            .playlist-item:hover { background: rgba(255, 255, 255, 0.08); padding-left: 20px; color: #fff; }
+        }
+
+        .playlist-item.playing { color: #000; font-weight: 600; background: #fff; padding-left: 20px; transform: scale(0.98); box-shadow: inset 0 0 10px rgba(0,0,0,0.1); }
+        
+        /* Scrollbar */
         ::-webkit-scrollbar { width: 4px; } ::-webkit-scrollbar-track { background: transparent; } ::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.2); border-radius: 10px; } ::-webkit-scrollbar-thumb:hover { background: rgba(255, 255, 255, 0.5); }
+
     </style>
 </head>
 <body>
@@ -218,12 +284,13 @@
         <h2>PlayList Nika</h2>
         
         <label class="custom-file-upload">
-            <input type="file" id="audioUpload" accept="audio/*" multiple>
+            <input type="file" id="audioUpload" accept=".mp3, .mp4, audio/mp3, video/mp4" multiple>
             + Load Tracks
         </label>
         
         <audio id="myAudio"></audio>
-        <div class="status" id="statusText">Sistem siap. Pilih lagu Anda.</div>
+        
+        <div class="status" id="statusText" title="Sistem siap. Pilih lagu Anda.">Sistem siap. Pilih lagu Anda.</div>
 
         <div class="progress-container">
             <span id="currentTime">0:00</span>
@@ -246,7 +313,7 @@
 </div>
 
 <script>
-    // --- LOGIKA INTRO SUPER MULUS ---
+    // --- LOGIKA INTRO ---
     window.addEventListener('load', () => {
         const loader = document.getElementById('nika-loader');
         const nikaCore = document.getElementById('nikaCore');
@@ -254,29 +321,25 @@
         const playerWrapper = document.getElementById('playerWrapper');
         const card = document.getElementById('playerCard');
         
-        // Biarkan berdetak 3.2 detik (tepat 2 ritme penuh)
         setTimeout(() => {
-            // Teks memudar dengan lembut
             loaderText.style.opacity = '0';
             loaderText.style.transition = 'opacity 0.5s ease';
             
-            // Inti matahari meledak menjadi cahaya bulat sempurna
             nikaCore.classList.add('explode');
             
-            // Setelah cahaya menutupi layar, transisi ke Player
             setTimeout(() => {
                 loader.classList.add('hidden');
                 
-                // Pastikan player di-render dulu di belakang layar
+                playerWrapper.style.display = 'flex';
+                void playerWrapper.offsetWidth; 
                 playerWrapper.classList.add('visible');
                 
-                // Animasi masuk melayang elegan
                 setTimeout(() => {
                     playerWrapper.style.opacity = '1';
                     card.classList.add('show');
                 }, 50); 
 
-            }, 700); // Tunggu skala membesar selesai
+            }, 800); 
 
         }, 3200); 
     });
@@ -295,6 +358,11 @@
 
     let songFiles = [];
     audio.loop = true;
+
+    // Fungsi membersihkan nama file dari ekstensi mp3 dan mp4
+    function cleanFileName(filename) {
+        return filename.replace(/\.(mp3|mp4)$/i, '');
+    }
 
     function formatTime(seconds) {
         if (isNaN(seconds)) return "0:00";
@@ -329,8 +397,13 @@
             songFiles.forEach((file, index) => {
                 const item = document.createElement('div');
                 item.className = 'playlist-item'; 
-                item.innerText = file.name.replace('.mp3', ''); 
-                item.style.animationDelay = `${index * 0.08}s`;
+                
+                // Gunakan fungsi cleanFileName
+                let displayName = cleanFileName(file.name);
+                item.innerText = displayName; 
+                item.title = displayName; // Tooltip saat di-hover
+                
+                item.style.animationDelay = `${index * 0.05}s`; 
                 item.addEventListener('click', () => playSong(index));
                 playlistContainer.appendChild(item);
             });
@@ -344,10 +417,16 @@
         const url = URL.createObjectURL(file);
         audio.src = url;
         audio.play();
-        statusText.innerText = "Memutar: " + file.name.replace('.mp3', '');
+        
+        let songName = cleanFileName(file.name);
+        statusText.innerText = "Memutar: " + songName;
+        // Tambahkan atribut title agar judul lengkap bisa dilihat saat ditekan lama/di-hover
+        statusText.title = "Memutar: " + songName; 
         statusText.style.color = "#fff";
+        
         playBtn.style.display = 'none';
         pauseBtn.style.display = 'block';
+        
         const items = document.querySelectorAll('.playlist-item');
         items.forEach(el => el.classList.remove('playing'));
         items[index].classList.add('playing');
