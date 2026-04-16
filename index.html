@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>PlayList Nika - Ultimate Visualizer</title>
+    <title>PlayList Nika - Auto Save</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;800&display=swap');
 
@@ -69,18 +69,16 @@
         }
         #nika-loader.hidden { pointer-events: none; opacity: 0; transition: opacity 0.8s ease 0.2s; }
 
-        /* --- BACKGROUND BLOBS (Diatur JS nanti) --- */
+        /* --- BACKGROUND BLOBS --- */
         .blob {
             position: absolute; border-radius: 50%; filter: blur(70px); z-index: 1; opacity: 0.5;
-            transition: transform 0.1s ease-out; /* Penting untuk animasi beat responsif */
+            transition: transform 0.1s ease-out; 
         }
         .blob-1 { width: 40vh; height: 40vh; min-width: 300px; min-height: 300px; background: linear-gradient(135deg, #ffffff, #333333); top: -10%; left: -10%; }
         .blob-2 { width: 35vh; height: 35vh; min-width: 250px; min-height: 250px; background: linear-gradient(135deg, #666666, #111111); bottom: -10%; right: -10%; }
 
         /* --- MAIN PLAYER --- */
-        #playerWrapper {
-            display: none; opacity: 0; z-index: 10; width: 100%; height: 100%; justify-content: center; align-items: center;
-        }
+        #playerWrapper { display: none; opacity: 0; z-index: 10; width: 100%; height: 100%; justify-content: center; align-items: center; }
         #playerWrapper.visible { display: flex; }
 
         .glass-card {
@@ -105,10 +103,7 @@
         input[type="file"] { display: none; }
 
         /* --- VISUALISATOR CANVAS --- */
-        #visualizer {
-            width: 100%; height: 40px; margin-bottom: 15px; display: block;
-            border-radius: 10px; opacity: 0.8;
-        }
+        #visualizer { width: 100%; height: 40px; margin-bottom: 15px; display: block; border-radius: 10px; opacity: 0.8; }
 
         .status { 
             font-size: 0.85em; font-weight: 300; color: rgba(255, 255, 255, 0.5); margin-bottom: 15px; transition: color 0.4s var(--smooth-ease); 
@@ -173,14 +168,13 @@
         
         <label class="custom-file-upload">
             <input type="file" id="audioUpload" accept=".mp3, .mp4, audio/mp3, video/mp4" multiple>
-            + Load Tracks
+            + Update Playlist
         </label>
         
         <audio id="myAudio"></audio>
-        
         <canvas id="visualizer" width="300" height="40"></canvas>
         
-        <div class="status" id="statusText" title="Sistem siap. Pilih lagu Anda.">Sistem siap. Pilih lagu Anda.</div>
+        <div class="status" id="statusText" title="Sistem siap. Pilih lagu Anda.">Sistem siap.</div>
 
         <div class="progress-container">
             <span id="currentTime">0:00</span>
@@ -209,6 +203,47 @@
 </div>
 
 <script>
+    // --- 1. INISIALISASI DATABASE BROWSER (INDEXEDDB) ---
+    let db;
+    const request = indexedDB.open("NikaMusicDB", 1);
+
+    request.onupgradeneeded = (event) => {
+        db = event.target.result;
+        // Membuat tabel penyimpanan bernama "songs"
+        db.createObjectStore("songs", { keyPath: "name" });
+    };
+
+    request.onsuccess = (event) => {
+        db = event.target.result;
+        // Saat web dimuat, langsung cek apakah ada lagu yang tersimpan sebelumnya
+        loadPlaylistFromDB(); 
+    };
+
+    function savePlaylistToDB(filesArray) {
+        const transaction = db.transaction(["songs"], "readwrite");
+        const store = transaction.objectStore("songs");
+        store.clear(); // Bersihkan yang lama agar tidak menumpuk error
+        filesArray.forEach(file => {
+            store.put({ name: file.name, data: file });
+        });
+    }
+
+    function loadPlaylistFromDB() {
+        const transaction = db.transaction(["songs"], "readonly");
+        const store = transaction.objectStore("songs");
+        const req = store.getAll();
+
+        req.onsuccess = (event) => {
+            const results = event.target.result;
+            if (results && results.length > 0) {
+                // Mengekstrak kembali file yang tersimpan
+                songFiles = results.map(item => item.data);
+                renderPlaylistUI();
+                statusText.innerText = "Lagu dipulihkan 🔄 Klik lagu untuk putar.";
+            }
+        };
+    }
+
     // --- LOGIKA INTRO ---
     window.addEventListener('load', () => {
         const loader = document.getElementById('nika-loader');
@@ -242,64 +277,51 @@
     const progressBar = document.getElementById('progressBar');
     const currentTimeEl = document.getElementById('currentTime');
     const durationTimeEl = document.getElementById('durationTime');
-    
-    // Background Blobs untuk efek detak bass
     const blob1 = document.getElementById('blob1');
     const blob2 = document.getElementById('blob2');
 
     let songFiles = [];
     let currentSongIndex = -1;
     let isShuffle = false;
-    audio.loop = false; // Kita matikan loop native agar bisa dikontrol lewat JS (untuk fitur Next otomatis)
+    audio.loop = false; 
 
-    // --- LOGIKA WEB AUDIO API (VISUALIZER) ---
+    // --- VISUALIZATOR MUSIK ---
     let audioCtx, analyser, source, dataArray;
     const canvas = document.getElementById('visualizer');
     const canvasCtx = canvas.getContext('2d');
 
     function initVisualizer() {
-        if(audioCtx) return; // Jangan inisialisasi ganda
+        if(audioCtx) return; 
         audioCtx = new (window.AudioContext || window.webkitAudioContext)();
         analyser = audioCtx.createAnalyser();
         source = audioCtx.createMediaElementSource(audio);
         source.connect(analyser);
         analyser.connect(audioCtx.destination);
         
-        analyser.fftSize = 64; // Resolusi batang (bar)
-        const bufferLength = analyser.frequencyBinCount;
-        dataArray = new Uint8Array(bufferLength);
-        
+        analyser.fftSize = 64; 
+        dataArray = new Uint8Array(analyser.frequencyBinCount);
         drawVisualizer();
     }
 
     function drawVisualizer() {
         requestAnimationFrame(drawVisualizer);
         analyser.getByteFrequencyData(dataArray);
-
         canvasCtx.clearRect(0, 0, canvas.width, canvas.height);
         
         const barWidth = (canvas.width / dataArray.length) * 1.5;
-        let x = 0;
-        let bassSum = 0; // Untuk menghitung kekuatan bass
+        let x = 0; let bassSum = 0; 
 
         for(let i = 0; i < dataArray.length; i++) {
             const barHeight = (dataArray[i] / 255) * canvas.height;
-            
-            // Hitung frekuensi rendah (bass) dari 5 data pertama
             if (i < 5) bassSum += dataArray[i];
-
-            // Warna batang putih transparan dengan glow
             canvasCtx.fillStyle = `rgba(255, 255, 255, ${0.4 + (dataArray[i]/255)*0.6})`;
             canvasCtx.fillRect(x, canvas.height - barHeight, barWidth, barHeight);
-            
             x += barWidth + 2;
         }
 
-        // --- ANIMASI BACKGROUND AUDIO-REACTIVE ---
-        // Jika musik dimainkan, bola background akan membesar/bergetar sesuai kekuatan BASS!
         if (!audio.paused) {
             let avgBass = bassSum / 5;
-            let scaleEffect = 1 + (avgBass / 255) * 0.15; // Maksimal membesar 15%
+            let scaleEffect = 1 + (avgBass / 255) * 0.15; 
             blob1.style.transform = `scale(${scaleEffect}) translate(-10px, -10px)`;
             blob2.style.transform = `scale(${scaleEffect}) translate(10px, 10px)`;
         } else {
@@ -308,7 +330,7 @@
         }
     }
 
-    // --- FUNGSI PEMUTAR MUSIK ---
+    // --- FUNGSI PEMUTAR & PLAYLIST ---
     function cleanFileName(filename) { return filename.replace(/\.(mp3|mp4)$/i, ''); }
     function formatTime(seconds) {
         if (isNaN(seconds)) return "0:00";
@@ -326,33 +348,39 @@
     audio.addEventListener('loadedmetadata', () => { durationTimeEl.innerText = formatTime(audio.duration); });
     progressBar.addEventListener('input', () => { if (audio.duration) audio.currentTime = (progressBar.value / 100) * audio.duration; });
 
-    // Upload & Render Playlist
+    // Fungsi menggambar ulang list HTML
+    function renderPlaylistUI() {
+        playlistContainer.innerHTML = ""; 
+        songFiles.forEach((file, index) => {
+            const item = document.createElement('div');
+            item.className = 'playlist-item'; 
+            let displayName = cleanFileName(file.name);
+            item.innerText = displayName; 
+            item.title = displayName; 
+            item.style.animationDelay = `${index * 0.05}s`; 
+            item.addEventListener('click', () => playSong(index));
+            playlistContainer.appendChild(item);
+        });
+    }
+
+    // Event saat tombol upload lagu baru
     upload.addEventListener('change', function(e) {
-        songFiles = Array.from(e.target.files);
-        if (songFiles.length > 0) {
-            playlistContainer.innerHTML = ""; 
-            songFiles.forEach((file, index) => {
-                const item = document.createElement('div');
-                item.className = 'playlist-item'; 
-                let displayName = cleanFileName(file.name);
-                item.innerText = displayName; 
-                item.title = displayName; 
-                item.style.animationDelay = `${index * 0.05}s`; 
-                item.addEventListener('click', () => playSong(index));
-                playlistContainer.appendChild(item);
-            });
-            statusText.innerText = "Lagu berhasil dimuat.";
+        const newFiles = Array.from(e.target.files);
+        if (newFiles.length > 0) {
+            songFiles = newFiles; // Memperbarui daftar internal
+            renderPlaylistUI(); // Menggambar daftar di layar
+            savePlaylistToDB(songFiles); // MENYIMPAN KE DATABASE BROWSER
+            
+            statusText.innerText = "Playlist diperbarui.";
             statusText.style.color = "rgba(255,255,255,0.8)";
-            currentSongIndex = -1; // Reset
+            currentSongIndex = -1; 
         }
     });
 
     function playSong(index) {
         if(songFiles.length === 0) return;
         
-        // Panggil initVisualizer (hanya berjalan sekali karena dicegah di fungsinya)
         initVisualizer();
-        // Lanjutkan AudioContext jika browser nge-block (fitur keamanan Safari/Chrome)
         if(audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
 
         currentSongIndex = index;
@@ -371,12 +399,9 @@
         const items = document.querySelectorAll('.playlist-item');
         items.forEach(el => el.classList.remove('playing'));
         if(items[index]) items[index].classList.add('playing');
-        
-        // Scroll otomatis ke lagu yang sedang diputar di daftar
         items[index].scrollIntoView({ behavior: 'smooth', block: 'nearest' });
     }
 
-    // Tombol Main Controls
     playBtn.addEventListener('click', () => {
         initVisualizer();
         if(audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
@@ -392,12 +417,11 @@
         audio.pause(); playBtn.style.display = 'block'; pauseBtn.style.display = 'none'; statusText.innerText = "Dijeda.";
     });
 
-    // Fitur Next & Prev
     nextBtn.addEventListener('click', playNextSong);
     prevBtn.addEventListener('click', () => {
         if(songFiles.length === 0) return;
         let prevIndex = currentSongIndex - 1;
-        if(prevIndex < 0) prevIndex = songFiles.length - 1; // Putar balik ke akhir
+        if(prevIndex < 0) prevIndex = songFiles.length - 1; 
         playSong(prevIndex);
     });
 
@@ -405,45 +429,33 @@
         if(songFiles.length === 0) return;
         if(isShuffle) {
             let randIndex = Math.floor(Math.random() * songFiles.length);
-            // Cegah lagu yang sama terputar 2x berturut-turut jika lebih dari 1 lagu
-            while(randIndex === currentSongIndex && songFiles.length > 1) {
-                randIndex = Math.floor(Math.random() * songFiles.length);
-            }
+            while(randIndex === currentSongIndex && songFiles.length > 1) randIndex = Math.floor(Math.random() * songFiles.length);
             playSong(randIndex);
         } else {
             let nextIndex = currentSongIndex + 1;
-            if(nextIndex >= songFiles.length) nextIndex = 0; // Balik ke lagu pertama
+            if(nextIndex >= songFiles.length) nextIndex = 0; 
             playSong(nextIndex);
         }
     }
 
-    // Logika Auto-Next / Auto-Loop
     audio.addEventListener('ended', () => {
-        if (audio.loop) {
-            audio.play(); // Ulangi lagu ini
-        } else {
-            playNextSong(); // Lanjut lagu berikutnya atau acak
-        }
+        if (audio.loop) { audio.play(); } else { playNextSong(); }
     });
 
-    // Tombol Loop
     loopBtn.addEventListener('click', () => {
         audio.loop = !audio.loop;
         if (audio.loop) { 
             loopBtn.classList.add('active'); loopBtn.innerText = "🔁 Loop: ON"; 
-            // Matikan shuffle jika Loop nyala, biar tidak bingung
             isShuffle = false; shuffleBtn.classList.remove('active'); shuffleBtn.innerText = "🔀 Shuffle: OFF";
         } else { 
             loopBtn.classList.remove('active'); loopBtn.innerText = "🔁 Loop: OFF"; 
         }
     });
 
-    // Tombol Shuffle
     shuffleBtn.addEventListener('click', () => {
         isShuffle = !isShuffle;
         if (isShuffle) { 
             shuffleBtn.classList.add('active'); shuffleBtn.innerText = "🔀 Shuffle: ON"; 
-            // Matikan loop 1 lagu jika Shuffle nyala
             audio.loop = false; loopBtn.classList.remove('active'); loopBtn.innerText = "🔁 Loop: OFF";
         } else { 
             shuffleBtn.classList.remove('active'); shuffleBtn.innerText = "🔀 Shuffle: OFF"; 
